@@ -1,5 +1,6 @@
-package database.connection
+package database.utils
 
+import database.connection.JdbcConnectionPool
 import java.sql.Connection
 import java.sql.ResultSet
 
@@ -10,7 +11,7 @@ fun interface QueryExecutor {
         val connectionPool = getJdbcConnectionPool()
         val connection = connectionPool.getConnection()
         try {
-            return runnable(connection);
+            return runnable(connection)
         } finally {
             connectionPool.releaseConnection(connection)
         }

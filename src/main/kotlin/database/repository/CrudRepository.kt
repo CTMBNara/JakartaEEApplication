@@ -12,8 +12,8 @@ interface CrudRepository<Entity, Id> {
     suspend fun deleteAll()
     suspend fun deleteAll(entities: Iterable<Entity>)
     suspend fun deleteAllById(ids: Iterable<Id>)
-    suspend fun deleteById(entityId: Id)
+    suspend fun deleteById(id: Id)
 
     suspend fun count(): Long
-    suspend fun existsById(entityId: Id): Boolean
+    suspend fun existsById(id: Id): Boolean
 }

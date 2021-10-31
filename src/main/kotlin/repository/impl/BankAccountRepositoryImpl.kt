@@ -1,6 +1,6 @@
 package repository.impl
 
-import database.connection.QueryExecutor
+import database.utils.QueryExecutor
 import database.utils.toIn
 import database.utils.toValues
 import domain.BankAccount
@@ -52,8 +52,8 @@ class BankAccountRepositoryImpl(
     override suspend fun deleteAllById(ids: Iterable<String>): Unit = queryExecutor
         .executeQuery("DELETE FROM bank_account WHERE iban in ${ids.toIn { "'$it'" }}")
 
-    override suspend fun deleteById(entityId: String): Unit = queryExecutor
-        .executeQuery("DELETE FROM bank_account WHERE iban = '$entityId'")
+    override suspend fun deleteById(id: String): Unit = queryExecutor
+        .executeQuery("DELETE FROM bank_account WHERE iban = '$id'")
 
     override suspend fun count(): Long = queryExecutor
         .executeQuery("SELECT count(*) FROM bank_account") {
@@ -61,8 +61,8 @@ class BankAccountRepositoryImpl(
             it.getLong(1)
         }
 
-    override suspend fun existsById(entityId: String): Boolean = queryExecutor
-        .executeQuery("SELECT count(*) FROM bank_account WHERE iban = '$entityId'") {
+    override suspend fun existsById(id: String): Boolean = queryExecutor
+        .executeQuery("SELECT count(*) FROM bank_account WHERE iban = '$id'") {
             it.next()
             it.getLong(1) > 0
         }

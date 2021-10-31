@@ -13,9 +13,17 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt")
-    implementation("org.postgresql:postgresql:42.2.23.jre7")
+
+    implementation("org.postgresql:postgresql:42.2.24.jre7")
+
+    val tomcatVersion = "10.0.12"
+    implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatVersion")
+    implementation("org.apache.tomcat.embed:tomcat-embed-jasper:$tomcatVersion")
+    implementation("org.apache.tomcat:tomcat-jasper:$tomcatVersion")
+    implementation("org.apache.tomcat:tomcat-jasper-el:$tomcatVersion")
+    implementation("org.apache.tomcat:tomcat-jsp-api:$tomcatVersion")
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }

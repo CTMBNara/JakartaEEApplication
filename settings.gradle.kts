@@ -1,3 +1,2 @@
 
-rootProject.name = "Lab1"
-
+rootProject.name = "JakartaEEApplication"

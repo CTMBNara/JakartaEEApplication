@@ -1,37 +1,24 @@
-import database.connection.impl.JdbcConnectionPoolImpl
-import domain.BankAccount
-import kotlinx.coroutines.*
-import repository.impl.BankAccountRepositoryImpl
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.system.measureTimeMillis
+import org.apache.catalina.startup.Tomcat
+import servlet.DispatcherServlet
+import java.io.File
 
-fun main(args: Array<String>): Unit = runBlocking {
-    val bundle = ResourceBundle.getBundle("database")
-    val connectionPool = JdbcConnectionPoolImpl(
-        dataSourceUrl = bundle.getString("url"),
-        user = bundle.getString("user"),
-        password = bundle.getString("password")
-    )
-    val bankAccountRepository = BankAccountRepositoryImpl { connectionPool }
+fun main() {
+    val docBase = "src/main/webapp/"
+    val port = 8080
+    val contextPath = "/api"
+    val pattern = "/*"
 
-    val jobs = mutableListOf<Job>()
-    val a = AtomicInteger(0)
-    val time = measureTimeMillis {
-        repeat(100000) {
-            launch(Dispatchers.IO) {
-                val iban = a.getAndIncrement().toString().padStart(29, '0')
-                bankAccountRepository.save(BankAccount(iban))
-            }.also { jobs.add(it) }
-        }
+    val servlet = DispatcherServlet()
+
+    Tomcat().apply {
+        setPort(port)
+        connector
+
+        val context = addWebapp(contextPath, File(docBase).absolutePath)
+        Tomcat.addServlet(context, servlet::javaClass.name, servlet)
+        context.addServletMappingDecoded(pattern, servlet::javaClass.name)
+    }.also {
+        it.start()
+        it.server.await()
     }
-
-    jobs.joinAll()
-    println("Save time: $time")
-
-    println(bankAccountRepository.count())
-
-    bankAccountRepository.deleteAll()
-
-    println(bankAccountRepository.findAll())
 }
