@@ -1,8 +1,8 @@
 package repository.impl
 
-import database.utils.QueryExecutor
-import database.utils.toIn
-import database.utils.toValues
+import core.database.utils.QueryExecutor
+import core.database.utils.toIn
+import core.database.utils.toValues
 import domain.BankAccount
 import repository.BankAccountRepository
 import java.util.*

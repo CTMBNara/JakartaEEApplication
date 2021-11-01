@@ -1,4 +1,4 @@
-package database.repository
+package core.database.repository
 
 interface CrudRepository<Entity, Id> {
     suspend fun save(entity: Entity)

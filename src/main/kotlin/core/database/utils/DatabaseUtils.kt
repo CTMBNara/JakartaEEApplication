@@ -1,4 +1,4 @@
-package database.utils
+package core.database.utils
 
 fun <T> Iterable<T>.toValues(transform: (T) -> String): String =
     joinToString(separator = ",") { "(" + transform(it) + ")" }

@@ -1,24 +1,49 @@
+import core.web.http.annotation.Mapping
+import core.web.http.controller.Controller
+import core.web.http.controller.impl.HandlerMappingImpl
+import core.web.http.servlet.DispatcherServlet
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.apache.catalina.Context
 import org.apache.catalina.startup.Tomcat
-import servlet.DispatcherServlet
 import java.io.File
 
 fun main() {
     val docBase = "src/main/webapp/"
     val port = 8080
-    val contextPath = "/api"
-    val pattern = "/*"
+    val contextPath = ""
+    val pattern = "/api/*"
 
-    val servlet = DispatcherServlet()
+    val tomcat = Tomcat()
+    tomcat.setPort(port)
+    tomcat.connector
 
-    Tomcat().apply {
-        setPort(port)
-        connector
+    val context = tomcat.addWebapp(contextPath, File(docBase).absolutePath)
+    registerDispatcherServlet(context, pattern)
 
-        val context = addWebapp(contextPath, File(docBase).absolutePath)
-        Tomcat.addServlet(context, servlet::javaClass.name, servlet)
-        context.addServletMappingDecoded(pattern, servlet::javaClass.name)
-    }.also {
-        it.start()
-        it.server.await()
-    }
+    tomcat.start()
+    tomcat.server.await()
 }
+
+private fun registerDispatcherServlet(context: Context, pattern: String) {
+    val controllers = controllers()
+    val handlerMapping = HandlerMappingImpl(controllers)
+    val servlet = DispatcherServlet(pattern, handlerMapping)
+
+    Tomcat.addServlet(context, servlet::class.java.name, servlet)
+    context.addServletMappingDecoded(servlet.pattern, servlet::class.java.name)
+}
+
+private fun controllers(): Collection<Controller> = listOf(
+    object : Controller {
+        override val requestMapping: String
+            get() = "/main"
+
+        @Mapping("/test")
+        fun test(request: HttpServletRequest, response: HttpServletResponse): String {
+            println("yes")
+            return "/main.jsp"
+        }
+    }
+)
+

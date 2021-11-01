@@ -1,4 +1,4 @@
-package database.connection
+package core.database.connection
 
 import java.sql.Connection
 

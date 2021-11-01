@@ -1,6 +1,6 @@
-package database.utils
+package core.database.utils
 
-import database.connection.JdbcConnectionPool
+import core.database.connection.JdbcConnectionPool
 import java.sql.Connection
 import java.sql.ResultSet
 

@@ -1,6 +1,6 @@
-package database.connection.impl
+package core.database.connection.impl
 
-import database.connection.JdbcConnectionPool
+import core.database.connection.JdbcConnectionPool
 import kotlinx.coroutines.channels.Channel
 import java.sql.Connection
 import java.sql.DriverManager
