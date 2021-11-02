@@ -4,14 +4,13 @@ import core.web.http.annotation.Mapping
 import core.web.http.controller.Controller
 import core.web.http.controller.Handler
 import core.web.http.controller.HandlerMapping
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
+import java.lang.reflect.Proxy
 
 class HandlerMappingImpl(controllers: Collection<Controller>) : HandlerMapping {
     private val controllersMap: Map<String, Controller>
 
     init {
-        controllersMap = controllers.associateBy(Controller::requestMapping)
+        controllersMap = controllers.associateBy(Controller::getRequestMapping)
         require(controllersMap.size == controllers.size) {
             "Several controllers have the same mapping."
         }
@@ -24,18 +23,17 @@ class HandlerMappingImpl(controllers: Collection<Controller>) : HandlerMapping {
 
         val uri = requestUri.drop(controllerEntry.key.length)
 
-        val method = controllerEntry.value::class.java.declaredMethods.firstOrNull { method ->
+        val handler = controllerEntry.value::class.java.declaredMethods.firstOrNull { method ->
             val annotation = method.getAnnotation(Mapping::class.java)
             annotation != null && uri.matches(Regex(annotation.mapping))
         } ?: return null
 
-        require(method.returnType == String::class.java)
-        require(method.parameterCount == 2)
-        require(method.parameterTypes[0] == HttpServletRequest::class.java)
-        require(method.parameterTypes[1] == HttpServletResponse::class.java)
-
-        return Handler { handledRequest, handledResponse ->
-            method.invoke(controllerEntry.value, handledRequest, handledResponse) as String
-        }
+        return Proxy.newProxyInstance(
+            Handler::class.java.classLoader,
+            arrayOf(Handler::class.java)
+        ) { _, _, args ->
+            val nonNullArgs = args ?: arrayOf()
+            handler.invoke(controllerEntry.value, *nonNullArgs)
+        } as Handler
     }
 }

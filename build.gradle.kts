@@ -22,6 +22,7 @@ dependencies {
     implementation("org.apache.tomcat:tomcat-jasper:$tomcatVersion")
     implementation("org.apache.tomcat:tomcat-jasper-el:$tomcatVersion")
     implementation("org.apache.tomcat:tomcat-jsp-api:$tomcatVersion")
+    implementation("org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0")
 }
 
 tasks.withType<KotlinCompile> {

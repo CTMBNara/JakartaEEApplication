@@ -1,12 +1,14 @@
-import core.web.http.annotation.Mapping
+import core.database.connection.impl.JdbcConnectionPoolImpl
 import core.web.http.controller.Controller
 import core.web.http.controller.impl.HandlerMappingImpl
 import core.web.http.servlet.DispatcherServlet
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.apache.catalina.Context
 import org.apache.catalina.startup.Tomcat
+import repository.impl.BankAccountRepositoryImpl
+import service.impl.BankAccountServiceImpl
+import web.rest.BankAccountResource
 import java.io.File
+import java.util.*
 
 fun main() {
     val docBase = "src/main/webapp/"
@@ -34,16 +36,20 @@ private fun registerDispatcherServlet(context: Context, pattern: String) {
     context.addServletMappingDecoded(servlet.pattern, servlet::class.java.name)
 }
 
-private fun controllers(): Collection<Controller> = listOf(
-    object : Controller {
-        override val requestMapping: String
-            get() = "/main"
+private fun controllers(): Collection<Controller> {
+    val bundle = ResourceBundle.getBundle("database")
+    val connectionPool = JdbcConnectionPoolImpl(
+        dataSourceUrl = bundle.getString("url"),
+        user = bundle.getString("user"),
+        password = bundle.getString("password")
+    )
 
-        @Mapping("/test")
-        fun test(request: HttpServletRequest, response: HttpServletResponse): String {
-            println("yes")
-            return "/main.jsp"
-        }
-    }
-)
+    val bankAccountRepository = BankAccountRepositoryImpl { connectionPool }
+
+    val bankAccountService = BankAccountServiceImpl(bankAccountRepository)
+
+    val bankAccountResource = BankAccountResource(bankAccountService)
+
+    return listOf(bankAccountResource)
+}
 
