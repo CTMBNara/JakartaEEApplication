@@ -1,15 +1,14 @@
 package repository.impl
 
 import core.database.utils.QueryExecutor
+import core.database.utils.collect
 import core.database.utils.toIn
 import core.database.utils.toValues
 import domain.BankAccount
 import repository.BankAccountRepository
-import java.util.*
+import java.util.stream.Collectors
 
-class BankAccountRepositoryImpl(
-    private val queryExecutor: QueryExecutor
-) : BankAccountRepository {
+class BankAccountRepositoryImpl(private val queryExecutor: QueryExecutor) : BankAccountRepository {
     override suspend fun save(entity: BankAccount): Unit = queryExecutor
         .executeQuery("INSERT INTO bank_account(iban) VALUES ('${entity.iban}')")
 
@@ -18,20 +17,16 @@ class BankAccountRepositoryImpl(
 
     override suspend fun findAll(): Collection<BankAccount> = queryExecutor
         .executeQuery("SELECT * FROM bank_account") { result ->
-            val resultSet = mutableListOf<BankAccount>()
-            while (result.next()) resultSet.add(
+            result.collect(Collectors.toUnmodifiableList()) {
                 BankAccount(result.getString(1))
-            )
-            Collections.unmodifiableCollection(resultSet)
+            }
         }
 
     override suspend fun findAllById(ids: Iterable<String>): Collection<BankAccount> = queryExecutor
         .executeQuery("SELECT * FROM bank_account WHERE iban in ${ids.toIn { "'$it'" }}") { result ->
-            val resultSet = mutableListOf<BankAccount>()
-            while (result.next()) resultSet.add(
+            result.collect(Collectors.toUnmodifiableList()) {
                 BankAccount(result.getString(1))
-            )
-            Collections.unmodifiableCollection(resultSet)
+            }
         }
 
     override suspend fun findById(id: String): BankAccount? = queryExecutor
